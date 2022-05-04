@@ -293,6 +293,15 @@ if (NOT USE_EIGEN_OPENMP)
   set(CH_C_FLAGS "${CH_C_FLAGS} -DEIGEN_DONT_PARALLELIZE")
 endif()
 
+
+#-----------------------------------------------------------------------------
+# fclib library
+#-----------------------------------------------------------------------------
+option(WITH_FCLIB ON)
+if (WITH_FCLIB)
+  include(fclib_setup)
+endif()
+
 #-----------------------------------------------------------------------------
 # MPI support
 #-----------------------------------------------------------------------------
@@ -480,7 +489,7 @@ endif()
 # HDF5 support (optional)
 #-----------------------------------------------------------------------------
 
-option(ENABLE_HDF5 "Enable HDF5 support" OFF)
+option(ENABLE_HDF5 "Enable HDF5 support" ON)
 
 if(ENABLE_HDF5)
 

@@ -16,6 +16,9 @@
 #include "chrono/solver/ChConstraintTwoTuplesContactN.h"
 #include "chrono/solver/ChConstraintTwoTuplesFrictionT.h"
 #include "chrono/core/ChMatrix.h"
+extern "C" {
+#include <fclib.h>
+}
 
 namespace chrono {
 
@@ -731,5 +734,79 @@ void ChSystemDescriptor::WriteMatrixSpmv(const std::string& path, const std::str
     file_rhs.SetNumFormat(numformat);
     StreamOUTdenseMatlabFormat(rhs, file_rhs);
 }
+
+std::unique_ptr<fclib_matrix> ConvertChSpMatToFclibMat(const ChSparseMatrix &chMatrix) {
+    auto fclibMatrix = std::make_unique<fclib_matrix>(); 
+    fclibMatrix->nzmax = 0;
+    fclibMatrix->m = chMatrix.rows();
+    fclibMatrix->n = chMatrix.cols();
+    fclibMatrix->nz = 0;
+
+    // Compute nz
+    for (int i =0; i < fclibMatrix->m; i++) {
+        fclibMatrix->nz += chMatrix.innerNonZeroPtr()[i];
+    }
+    fclibMatrix->nzmax = fclibMatrix->nz;
+
+    // Construction of the triplet matrix
+    fclibMatrix->p = new int[fclibMatrix->nz];
+    fclibMatrix->i = new int[fclibMatrix->nz];
+    fclibMatrix->x = new double[fclibMatrix->nz];
+
+    int pos = 0;
+    for (int l = 0; l < fclibMatrix->m; l++) {
+        int inner_start = chMatrix.outerIndexPtr()[l];
+        for (int i = 0; i < chMatrix.innerNonZeroPtr()[l]; i++) {
+            fclibMatrix->p[pos] = l;
+            fclibMatrix->i[pos] = chMatrix.innerIndexPtr()[inner_start + i];
+            fclibMatrix->x[pos] = chMatrix.valuePtr()[inner_start + i];
+        }
+    }
+    return fclibMatrix;
+}
+
+std::unique_ptr<double[]> ConvertChVecToTab(ChVectorDynamic<> &chVec) {
+    auto vec = std::make_unique<double[]>(chVec.rows());
+    for (int i = 0; i < chVec.rows(); i++) {
+        vec[i] = chVec(i, 0);
+    }
+    return vec;
+}
+
+std::unique_ptr<fclib_global> ChSystemDescriptor::ConvertToFCLIBForm() {
+
+    ChSparseMatrix Cq, H, E;
+    ChVectorDynamic<> Fvector, Bvector, Frict;
+    ConvertToMatrixForm(&Cq, &H, &E, &Fvector, &Bvector, &Frict);
+
+    auto fcSystem = std::make_unique<fclib_global>();
+
+    auto fc_M = ConvertChSpMatToFclibMat(H);
+    fcSystem->M = fc_M.get();
+
+    auto fc_H = ConvertChSpMatToFclibMat(-Cq);
+    // Transpose H
+    std::swap(fc_H->p, fc_H->i);
+    fcSystem->H = fc_H.get();
+
+    fcSystem->G = nullptr;
+
+    fcSystem->mu = ConvertChVecToTab(Frict).get();
+    fcSystem->f = ConvertChVecToTab(Fvector).get();
+    fcSystem->b = nullptr;
+    fcSystem->w = ConvertChVecToTab(Bvector).get();
+
+    fcSystem->spacedim = 3;
+
+    return fcSystem;
+}
+
+int ChSystemDescriptor::write_problem_hdf5(const char *path) {
+    auto problem = ConvertToFCLIBForm();
+    int res = fclib_write_global(problem.get(), path);
+    fclib_delete_global(problem.get());
+    return res;
+}
+
 
 }  // end namespace chrono

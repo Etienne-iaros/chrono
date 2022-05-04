@@ -21,11 +21,14 @@ set(CH_INCLUDES ${CH_INCLUDES} "${CMAKE_CURRENT_SOURCE_DIR}/collision/bullet" )
 set(CH_INCLUDES ${CH_INCLUDES} "${CMAKE_CURRENT_SOURCE_DIR}/collision/gimpact" )
 set(CH_INCLUDES ${CH_INCLUDES} "${CMAKE_CURRENT_SOURCE_DIR}/../chrono_thirdparty/HACD" )
 set(CH_INCLUDES ${CH_INCLUDES} "${CMAKE_CURRENT_SOURCE_DIR}/../chrono_thirdparty/HACDv2" )
+set(CH_INCLUDES ${CH_INCLUDES} "${CMAKE_CURRENT_SOURCE_DIR}/fclib")
+
 
 # Make CH_INCLUDES visible in parent scope
 set(CH_INCLUDES "${CH_INCLUDES}" PARENT_SCOPE)
 
 include_directories(${CH_INCLUDES})
+
 
 #-----------------------------------------------------------------------------
 # Collect files in the main ChronoEngine library
@@ -1304,6 +1307,18 @@ set(ChronoEngine_tiny_obj_FILES
 source_group(utils\\tiny_obj FILES
     ${ChronoEngine_tiny_obj_FILES})
 
+# fclib group
+
+#[[set(ChronoEngine_fclib_SOURCES
+    fclib/fclib.c)
+
+set(ChronoEngine_fclib_HEADERS
+    fclib/fclib.h)
+
+source_group(fclib FILES
+    ${ChronoEngine_fclib_SOURCES}
+    ${ChronoEngine_fclib_HEADERS})]]
+
 # Collect all source and header files for the ChronoEngine library
 
 set(ChronoEngine_FILES
@@ -1356,14 +1371,18 @@ set(ChronoEngine_FILES
     ${ChronoEngine_utils_SOURCES}
     ${ChronoEngine_utils_HEADERS}
     ${ChronoEngine_tiny_obj_FILES}
+    #[[${ChronoEngine_fclib_SOURCES}
+    ${ChronoEngine_fclib_HEADERS}]]
     )
 
 # Add the ChronoEngine library to the project
 add_library(ChronoEngine SHARED ${ChronoEngine_FILES})
 
-target_link_libraries(ChronoEngine ${OPENMP_LIBRARIES})
+# find_package(HDF5 REQUIRED COMPONENTS C HL)
 if (UNIX)
-  target_link_libraries(ChronoEngine pthread)
+  target_link_libraries(ChronoEngine pthread ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} fclib)
+elseif()
+  target_link_libraries(ChronoEngine ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} fclib)
 endif()
 
 # Set some custom properties of this target

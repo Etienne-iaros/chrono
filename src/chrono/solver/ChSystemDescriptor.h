@@ -20,6 +20,9 @@
 #include "chrono/solver/ChConstraint.h"
 #include "chrono/solver/ChKblock.h"
 #include "chrono/solver/ChVariables.h"
+extern "C" {
+    #include <fclib.h>
+}
 
 namespace chrono {
 
@@ -364,6 +367,10 @@ class ChApi ChSystemDescriptor {
         // deserialize parent class
         // stream in all member data:
     }
+
+    virtual std::unique_ptr<fclib_global> ConvertToFCLIBForm();
+
+    virtual int write_problem_hdf5(const char *path);
 };
 
 CH_CLASS_VERSION(ChSystemDescriptor, 0)
