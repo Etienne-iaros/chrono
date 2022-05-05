@@ -47,6 +47,7 @@ set(CHRONO_VERSION_PATCH 0)
 
 project(Chrono VERSION ${CHRONO_VERSION_MAJOR}.${CHRONO_VERSION_MINOR}.${CHRONO_VERSION_PATCH})
 
+
 set(CHRONO_VERSION "${CHRONO_VERSION_MAJOR}.${CHRONO_VERSION_MINOR}.${CHRONO_VERSION_PATCH}")
 
 set(CPACK_PACKAGE_VERSION "${CHRONO_VERSION}")
@@ -78,6 +79,7 @@ if("${VCS_REVISION}" MATCHES ".*-NOTFOUND$")
 endif()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+cmake_policy(SET CMP0074 NEW) # find_package() uses <PackageName>_ROOT variables.
 
 #-----------------------------------------------------------------------------
 # Enable CTest

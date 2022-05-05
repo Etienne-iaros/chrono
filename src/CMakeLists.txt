@@ -297,7 +297,7 @@ endif()
 #-----------------------------------------------------------------------------
 # fclib library
 #-----------------------------------------------------------------------------
-option(WITH_FCLIB ON)
+#option(WITH_FCLIB ON)
 if (WITH_FCLIB)
   include(fclib_setup)
 endif()

@@ -1312,12 +1312,12 @@ source_group(utils\\tiny_obj FILES
 #[[set(ChronoEngine_fclib_SOURCES
     fclib/fclib.c)
 
-set(ChronoEngine_fclib_HEADERS
-    fclib/fclib.h)
+#set(ChronoEngine_fclib_HEADERS
+#    fclib/fclib.h)
 
-source_group(fclib FILES
-    ${ChronoEngine_fclib_SOURCES}
-    ${ChronoEngine_fclib_HEADERS})]]
+#source_group(fclib FILES
+#    ${ChronoEngine_fclib_SOURCES}
+#    ${ChronoEngine_fclib_HEADERS})]]
 
 # Collect all source and header files for the ChronoEngine library
 
@@ -1372,7 +1372,7 @@ set(ChronoEngine_FILES
     ${ChronoEngine_utils_HEADERS}
     ${ChronoEngine_tiny_obj_FILES}
     #[[${ChronoEngine_fclib_SOURCES}
-    ${ChronoEngine_fclib_HEADERS}]]
+    #${ChronoEngine_fclib_HEADERS}]]
     )
 
 # Add the ChronoEngine library to the project
@@ -1380,10 +1380,11 @@ add_library(ChronoEngine SHARED ${ChronoEngine_FILES})
 
 # find_package(HDF5 REQUIRED COMPONENTS C HL)
 if (UNIX)
-  target_link_libraries(ChronoEngine pthread ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} fclib)
+  target_link_libraries(ChronoEngine pthread ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} FCLIB::fclib)
 elseif()
-  target_link_libraries(ChronoEngine ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} fclib)
+  target_link_libraries(ChronoEngine ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} FCLIB::fclib)
 endif()
+
 
 # Set some custom properties of this target
 set_target_properties(ChronoEngine PROPERTIES LINK_FLAGS "${CH_LINKERFLAG_SHARED}")
